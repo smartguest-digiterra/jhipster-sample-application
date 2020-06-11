@@ -1,0 +1,152 @@
+//**********************ENTITIES*************************           //
+/**
+ * Dining Order user stories
+ * @author Digiterra Software Factory: Veena Paul <digiterragroup.com>
+ */
+entity DiningReservation {
+	hostName String //automatically pickup from log in?- no need
+    hostId Integer //userid smartuser id
+    hospitalityVenueId Integer
+    startDate ZonedDateTime
+    endDate ZonedDateTime
+	diningOrderType Integer  //relationship
+	paymentOptionType Integer //relationship
+    numberOfGuests Integer //needed?
+}
+/**
+ * Dining Order Type
+ * Take Away, Drive thru(COVID plans),Home dining, RoomService, Restaurant Dining (Table booking)
+  */
+entity DiningOrderType {
+	diningOrderTypeDisplayCode String
+    diningOrderTypeDescription String
+    
+}
+/**
+ * HostGuest referred sign up tableTable
+ * Will be used for points system
+ * Once host enter these details, the details will be inserted into this table and sends the guest a notification with link. 
+ *	From there onwards starting with the onboarding process. If they create a user id need to bring back the value of Signup status to True else False.
+ *	Need to revisit this entity
+  */
+entity ReferredSignups {
+	hostId Integer //smart guest userid
+    guestName String
+    guestEmail String
+    guestContactNumber String
+    signupStatus Boolean
+}
+
+/**
+ * Starters,Drinks,Main,Desserts etc
+ * Also use the same thing for specials, considering the fact that, 
+ *most of the specials will be a combination of several 
+ *types and restaurant can package it accordingly
+ 
+ * Also note that the extra's and choices may vary based on the specials.
+  */
+entity DiningMenuType {
+ 	diningMenuTypeDisplayCode String
+ 	diningMenuTypeDescription String
+}
+
+/**
+ * Choices to opt as per the screen design
+ * considering- Medium/ well done/ as some values?
+ * considering- portion size- as some values?
+  */
+  
+entity DiningMenuChoice {
+ 	diningMenuChoiceDisplayCode String
+ 	diningMenuChoiceDescription String
+  //relationship  DiningMenuChoiceGroupid Integer 
+}
+/**
+ *The dining Menu choices and extra relationship table
+ 
+  */
+entity DiningMenuChoiceGroup{
+	displayCode String
+    diningMenuChoiceId Integer //relationship
+}
+/**
+ * extra's  to opt as per the screen design
+ * considering- more cheese, avacado etc as different values?
+  */
+entity DiningMenuExtra {
+	 diningMenuExtraDisplayCode String
+     diningMenuExtraDescription String
+}
+
+/**
+ *The dining Menu and its details
+ 
+  */
+entity DiningMenu{
+	diningMenuDisplayCode String
+    diningMenuDescription String
+    diningMenuTypeId Integer //relationship
+}
+
+
+/**
+ *The dining Menu Order details
+ 
+  */
+entity DiningMenuOrder{
+	orderDisplayCode Integer
+    diningMenuOrderName String
+    diningMenuOrderChefInstructions String 
+    diningMenuOrderPersonId Integer //can be host or guest // relationship userid
+    diningMenuOrderQuantity Integer
+    diningMenuOrderType Integer //relationship
+    diningMenuOrderCost Double
+}
+
+/**
+ *The dining Menu Order Extra details--needed, if handled using many to many relationship?
+ 
+  */
+entity DiningMenuOrderExtra{
+	diningMenuOrderId Integer
+    diningMenuExtraId Integer
+
+}
+
+/**
+ *The dining Menu Order Choice details (If it's a multiselect, otherwise can incorportae separately)
+ *--needed, if handled using many to many relationship?
+  */
+entity DiningMenuOrderChoice{
+	diningMenuOrderId Integer
+    diningMenuChoiceId Integer
+
+}
+//**********************RELATIONSHIPS*************************//
+
+
+/**
+ * One to Many Relationship
+ *
+  */
+relationship OneToMany {
+	DiningMenu{diningMenuType} to DiningMenuType
+	DiningReservation{diningOrderType} to DiningOrderType
+	DiningReservation{hostId} to User
+    ReferredSignups{hostId} to User
+    DiningMenuChoiceAndExtra{diningMenuId} to DiningMenu
+    DiningMenuChoiceAndExtra{diningMenuExtraId} to DiningMenuExtra
+    DiningMenuChoiceAndExtra{diningMenuChoiceId} to DiningMenuChoice  
+    DiningMenuOrder{diningMenuOrderExtraId} to DiningMenuOrderExtra
+    DiningMenuOrder{diningMenuOrderChoiceId} to DiningMenuOrderChoice  
+}
+relationship ManyToOne {
+	DiningMenuOrder{diningMenuOrderName} to DiningReservation
+	
+}
+relationship ManyToMany {
+	DiningMenuExtra{diningMenuType} to DiningMenuOrder
+	DiningMenuChoiceGroup{diningMenuChoice} to DiningMenuChoice
+    DiningMenuChoice{diningMenu} to DiningMenu
+    DiningMenuExtra{diningMenu} to DiningMenu
+}
